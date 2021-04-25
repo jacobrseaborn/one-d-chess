@@ -12,13 +12,15 @@ img {
 }
 
 .square {
-  width:100px;
-  height:100px;
-  float: left;
-  position: relative;
-  top: 200px;
-  left: 20%;
+  padding: 1%;
+  width:10%;
   border: none;
+  display: inline-block;
+}
+.square:after {
+  padding-bottom: 100%;
+  content: "";
+  display: inline-block;
 }
 .square[data-colour="0"] {
   background-color: #add7f6;
