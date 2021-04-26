@@ -1,5 +1,6 @@
 body {
-  background-color: #87bfff;
+  background-color: #3D3C38;
+  color: #BABAB8;
 }
 
 .App {
@@ -8,7 +9,18 @@ body {
 
 img {
   max-width: 100%;
+  width: 100%;
   height: auto;
+
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+#squares {
+  margin-top: 10%;
 }
 
 .square {
@@ -22,11 +34,12 @@ img {
   content: "";
   display: inline-block;
 }
+
 .square[data-colour="0"] {
-  background-color: #add7f6;
+  background-color: #7397AD;
 }
 .square[data-colour="1"] {
-  background-color: #3f8efc;
+  background-color: #CEDBE1;
 }
 
 .square:focus {
@@ -34,5 +47,40 @@ img {
 }
 
 .square[data-selected="true"] {
-  background-color: #a0eee1;
+  background-color: #69B7CF;
+}
+
+#modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0,0,0);
+  background-color: rgba(0,0,0,0.4);
+}
+
+#modal-content {
+  background-color: #31312e;
+  margin: 15% auto;
+  padding: 5%;
+  border-radius: 10px;
+  /* border: 1px solid #888; */
+  width: 80%;
+}
+#play-again-btn {
+  padding: 2%;
+  border-radius: 2px;
+  background-color: #7397AD;
+  border: none;
+  color: #BABAB8;
+}
+#play-again-btn:hover {
+  background-color: #67899e;
+}
+#play-again-btn:focus {
+  outline: 0;  
 }

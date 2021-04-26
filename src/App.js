@@ -9,9 +9,10 @@ import WhiteKing from './pieces/white-king.png';
 import WhiteKnight from './pieces/white-knight.png';
 import WhiteRook from './pieces/white-rook.png';
 
+import Dot from './pieces/dot.png';
+
 class Piece {
-  constructor(pos, colour, img, type) {
-    this.pos=pos;
+  constructor(colour, img, type) {
     this.colour=colour;
     this.img=img;
     this.type=type;
@@ -20,31 +21,35 @@ class Piece {
 
 class Game {
   constructor(){
-    this.selectedPiece=null;
+    this.init();
+  }
+
+  init() {
     this.selectedSquare=null;
+    this.validMoves=[];
 
     this.turn=false; //false = white .... true = black
     this.inCheck=null;
 
-    this.pieces = [new Piece(0,true,BlackKing, "king"),
-      new Piece(1,true,BlackKnight, "knight"),
-      new Piece(2,true,BlackRook, "rook"),
+    this.gameOver =false;
+    this.result="";
+
+    this.pieces = [new Piece(false,WhiteKing, "king"),
+      new Piece(false,WhiteKnight, "knight"),
+      new Piece(false,WhiteRook, "rook"),
       "",
       "",
-      new Piece(5,false,WhiteRook, "rook"),
-      new Piece(6,false,WhiteKnight, "knight"),
-      new Piece(7,false,WhiteKing, "king")]
+      new Piece(true,BlackRook, "rook"),
+      new Piece(true,BlackKnight, "knight"),
+      new Piece(true,BlackKing, "king")]
   }
 
   selectPiece(piece) {
-    this.selectedPiece= (typeof piece == typeof "") ? null : piece;
-    this.selectedSquare=(typeof piece == typeof "") ? null : piece.pos;
+    this.selectedSquare=(typeof piece === typeof "") ? null : this.pieces.indexOf(piece);
   }
 
   toggleTurn() {
     this.turn=!this.turn;
-
-    this.selectedPiece=null;
     this.selectedSquare=null;
   }
 
@@ -53,100 +58,148 @@ class Game {
 
     this.pieces[f]=game.pieces[i];
     this.pieces[i]="";
-    this.pieces[f].pos=f;
 
-    if (this.isCheck(colour)) { this.inCheck=colour }
-    else if (this.isCheck(!colour)) { this.inCheck=!colour }
+    if (this.isCheck(this.pieces, !colour)) { this.inCheck=!colour }
     else { this.inCheck=null }
   }
 
-  isCheck(colour) {
-    for (let i = 0; i<this.pieces.length; i++) {
-      if (this.pieces[i].colour===colour && this.pieces[i].type==="king") {
-        var king = this.pieces[i];
+  isCheck(board, colour) {
+    for (let i = 0; i<board.length; i++) {
+      if (board[i].colour===colour && board[i].type==="king") {
+        var king = board[i];
+        var kingPos = board.indexOf(king);
         break;
       }
     }
 
     //first check for knight checks
-    if (king.pos<=5) {
-      if (this.pieces[king.pos+2].type==="knight"&&this.pieces[king.pos+2].colour===!colour) {
-        return true;
-      }
+    if (kingPos<=5) {
+      if (board[kingPos+2].type==="knight"&&board[kingPos+2].colour===!colour) { return true; }
     }
-    if (king.pos>=2) {
-      if (this.pieces[king.pos-2].type==="knight"&&this.pieces[king.pos-2].colour===!colour) {
-        return true
-      }
+    if (kingPos>=2) {
+      if (board[kingPos-2].type==="knight"&&board[kingPos-2].colour===!colour) { return true; }
+    }
+
+    //next check for king checks
+    if (kingPos<=6) {
+      if (board[kingPos+1].type==="king"&&board[kingPos+1].colour===!colour) { return true; }
+    }
+    if (kingPos>=1) {
+      if (board[kingPos-1].type==="king"&&board[kingPos-1].colour===!colour) { return true; }
     }
 
     //next check for rook checks
     var rook = null;
-    for (let i = 0; i<this.pieces.length; i++) {
-      if (this.pieces[i].colour===!colour && this.pieces[i].type==="rook") {
-        rook = this.pieces[i];
+    for (let i = 0; i<board.length; i++) {
+      if (board[i].colour===!colour && board[i].type==="rook") {
+        rook = board[i];
+        var rookPos = board.indexOf(rook);
         break;
       }
     }
 
     if (rook!==null) {
-      for (let i = 1; i<Math.abs(rook.pos-king.pos);i++) {
-        if (this.pieces[(rook.pos>king.pos)?king.pos+i:king.pos-i]!=="" && this.pieces[(rook.pos>king.pos)?king.pos+i:king.pos-i]!==rook) {
+      for (let i = 1; i<Math.abs(rookPos-kingPos);i++) {
+        if (board[(rookPos>kingPos)?kingPos+i:kingPos-i]!=="" && board[(rookPos>kingPos)?kingPos+i:kingPos-i]!==rook) {
           return false;
         }
       } 
       return true;
     }
+    return false;
+  }
 
-
+  isStalemate() {
+    game.validMoves=[];
+    window.dispatchEvent(new Event("getAllValidMoves"));
+    if (game.validMoves.length===0 && !game.isCheck(game.pieces, !game.turn)) {
+      return true;
+    }
+    game.validMoves=[];
+    return false;
+  }
+  isCheckmate() {
+    game.validMoves=[];
+    window.dispatchEvent(new Event("getAllValidMoves"));
+    if (game.validMoves.length===0 && game.isCheck(game.pieces, !game.turn)) {
+      return true;
+    }
+    game.validMoves=[];
     return false;
   }
 }
-
 
 var game = new Game();
 
 class Square extends React.Component {
 
+  state = {
+    pos: this.props.pos,
+    contents: this.props.contents,
+    selected: false,
+    colour: this.props.pos % 2,
+    img: null,
+  }
 
   constructor(props) {
     super(props);
-    this.state = {
-      pos: this.props.pos,
-      contents: this.props.contents,
-      selected: false,
-      colour: this.props.pos % 2
-    }
+    this.setState();
 
     window.addEventListener("click", () => {
       this.update();
     });
 
-    this.movedEvent = new Event('moved');
-    window.addEventListener('moved', (e) => { 
+    window.addEventListener('deselectAll', (e) => { 
       this.deselect();
     }, false);
+    window.addEventListener('getAllValidMoves', () => {
+      if (game.pieces[this.state.pos]!=="") {
+        if (game.pieces[this.state.pos].colour!==game.turn) {
+          for (let i = 0; i<8; i++) {
+            if (this.isValidMove(i, this.state.pos, !game.turn)) {
+              game.validMoves.push(i);
+            }
+          }
+        }
+      } 
+    });
   }
 
   render() {
     return (
-      <button className="square" data-pos={this.state.pos} data-selected={this.state.selected} data-colour={this.state.colour} onClick={() => this.handleClick()}>
-        <img src={this.state.contents.img} alt={this.state.contents.type}/>
+      <button className="square" data-pos={this.props.pos} data-selected={this.state.selected} data-colour={this.state.colour} onClick={() => this.handleClick()}>
+        <img src={(this.state.img!==Dot)?this.state.contents.img:this.state.img} alt={this.state.contents.type} draggable="false"/>
       </button>
     );
   }
 
-  handleClick() {
-    if (game.selectedSquare!==null && this.isValidMove(this.state.pos)) {
+  handleClick = () => {
+    if (game.selectedSquare!==null && this.isValidMove(this.state.pos, game.selectedSquare, game.turn)) {
       game.movePiece(game.selectedSquare, this.state.pos);
+
+      if (game.isStalemate() || game.isCheckmate()) { 
+        game.gameOver=true; 
+        game.result = (game.isStalemate()) ? "stalemate":"checkmate";
+        window.dispatchEvent(new Event("gameOver"));
+        return;
+      }
+
       game.toggleTurn();
-      window.dispatchEvent(this.movedEvent); //deselect all squares
+      window.dispatchEvent(new Event("deselectAll")); //deselect all squares
       return;
+    } else if (game.selectedSquare!==null) {
+      window.dispatchEvent(new Event("deselectAll"));
     }
 
-    if (this.state.selected===false && game.selectedPiece===null && this.state.contents!=="") {
+    if (this.state.selected===false && game.selectedSquare===null && this.state.contents!=="") {
       if (game.pieces[this.state.pos].colour===game.turn) {
         this.select();
+
+        for (let i = 0; i<8; i++) {
+          if (this.isValidMove(i, game.selectedSquare, game.turn)) {
+            game.validMoves.push(i);
+          }
+        }
       }
     } else if (this.state.selected===true) {
       this.deselect();
@@ -156,6 +209,8 @@ class Square extends React.Component {
   deselect() {
     this.setState({selected:false});
     game.selectPiece("");
+
+    if (game.validMoves!==[]) { game.validMoves=[]; } //reset valid moves array
   }
   select() {
     this.setState({selected:true});
@@ -163,59 +218,65 @@ class Square extends React.Component {
   }
 
   update() {
-    this.setState({contents:game.pieces[this.state.pos]});
+    this.setState({contents:game.pieces[this.state.pos], img:(game.validMoves.includes(this.state.pos) && this.state.contents==="")?Dot:null});
   }
 
-  isValidMove(newPos) {
-    console.log(newPos + " from "+game.selectedSquare);
-    if (newPos===game.selectedSquare || game.pieces[newPos].colour===game.selectedPiece.colour) {
+  isValidMove(newPos, oldPos, turn) {
+    if (newPos===oldPos || game.pieces[newPos].colour===game.pieces[oldPos].colour) {
       return false;
     }
 
-    if (game.pieces[game.selectedSquare].type==="rook") { //rook
-      if (newPos<game.selectedSquare) {  //right to left
-        for (let i=1;i<game.selectedSquare-newPos;i++) {
-          if (game.pieces[game.selectedSquare-i]!=="") {
+    if (game.pieces[oldPos].type==="rook") { //rook
+      if (newPos<oldPos) {  //right to left
+        for (let i=1;i<oldPos-newPos;i++) {
+          if (game.pieces[oldPos-i]!=="") {
             return false;
           }
         }
       } else {
-        for (let i=1;i<newPos-game.selectedSquare;i++) {
-          if (game.pieces[game.selectedSquare+i]!=="") {
+        for (let i=1;i<newPos-oldPos;i++) {
+          if (game.pieces[oldPos+i]!=="") {
             return false;
           }
         }
       }
-    } else if (game.pieces[game.selectedSquare].type==="knight") { //knight
-      if (Math.abs(newPos-game.selectedSquare)!==2 || game.pieces[newPos].colour===game.selectedPiece.colour) {
+    } else if (game.pieces[oldPos].type==="knight") { //knight
+      if (Math.abs(newPos-oldPos)!==2 || game.pieces[newPos].colour===game.pieces[oldPos].colour) {
         return false;
       }
     } else {  //king
-      if (Math.abs(newPos-game.selectedSquare)!==1 || game.pieces[newPos].colour===game.selectedPiece.colour) {
+      if (Math.abs(newPos-oldPos)!==1 || game.pieces[newPos].colour===game.pieces[oldPos].colour) {
         return false;
       }
     }
-    return true; //no checks
+
+    //check if moving into check
+    let tempBoard = [...game.pieces];
+    tempBoard[newPos] = tempBoard[oldPos];
+    tempBoard[oldPos] = "";
+    if (game.isCheck(tempBoard, turn)) {
+      return false;
+    }
+
+    return true;
   }
 }
 
 class Board extends React.Component {
 
+  state = {
+    turn:game.turn,
+    warning:"",
+    modalMessage:"",
+  }
+
   constructor(props) {
     super(props);
-    this.state = {
-      turn:game.turn,
-      checks:game.inCheck
-    }
+    this.setState();
 
     window.addEventListener("click", () => {
       if (this.state.turn !== game.turn) {
         this.setState({turn:!this.state.turn}); //toggle turn
-      }
-
-      //show checks
-      if (game.inCheck!==this.state.checks) {
-        this.setState({ checks:game.inCheck });
       }
     });
   }
@@ -223,32 +284,72 @@ class Board extends React.Component {
   renderSquare(pos) {
       return <Square contents={game.pieces[pos]} pos={pos}/>
   }
-  renderInfo() {
-    if (this.state.checks!==null) {
-      return <h4>{(this.state.turn ? "black":"white") + " to move | " + (this.state.checks ? "black":"white") + " in check"}</h4>
-    } else {
-      return <h4>{(this.state.turn ? "black":"white")+" to move"}</h4>
-    }
+  renderWarning() {
+    return;
   }
-
-  //{this.state.turn ? "black to move":"white to move"}
+  renderModal() {
+    return (<Modal modalMessage={game.modalMessage}/>);
+  }
 
   render() {
     return(
       <div>
         <h1>chess :)</h1>
-        {this.renderInfo()}
-        {this.renderSquare(0)}
-        {this.renderSquare(1)}
-        {this.renderSquare(2)}
-        {this.renderSquare(3)}
-        {this.renderSquare(4)}
-        {this.renderSquare(5)}
-        {this.renderSquare(6)}
-        {this.renderSquare(7)}
+        <h4>{(this.state.turn ? "black":"white")+" to move"}</h4>
+        <div id="squares">
+          {this.renderSquare(0)}
+          {this.renderSquare(1)}
+          {this.renderSquare(2)}
+          {this.renderSquare(3)}
+          {this.renderSquare(4)}
+          {this.renderSquare(5)}
+          {this.renderSquare(6)}
+          {this.renderSquare(7)}
+        </div>
+        {this.renderModal()}
+        {this.renderWarning()}
 
       </div>
     );
+  }
+}
+
+class Modal extends React.Component {
+  state = {
+    modalMessage:""
+  }
+
+  constructor(props) {
+    super(props);
+    this.setState({modalMessage:this.props.modalMessage});
+
+    window.addEventListener("gameOver", () => {
+      if (game.result==="checkmate") {
+        this.setState({modalMessage: (game.turn ? "black":"white") + " wins by checkmate"})
+      } else {
+        this.setState({modalMessage:"the game was a draw due to stalemate"});  
+      }
+
+      document.getElementById("modal").style.display="block";
+    });
+  }
+
+  render() {
+    return(
+      <div id="modal">
+        <div id="modal-content">
+          <h2 id="modal-message">{this.state.modalMessage}</h2>
+          <button id="play-again-btn" onClick={() => this.playAgain()}>play again</button>
+        </div>
+      </div>
+    );
+  }
+
+  playAgain = () => {
+    game.init();
+    this.setState({modalMessage:""});
+    document.getElementById("modal").style.display="none";
+    window.dispatchEvent(new Event("deselectAll"));
   }
 }
 
