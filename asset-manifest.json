@@ -1,8 +1,8 @@
 {
   "files": {
-    "main.css": "/one-d-chess/static/css/main.910f1dd1.chunk.css",
-    "main.js": "/one-d-chess/static/js/main.45d5bbf5.chunk.js",
-    "main.js.map": "/one-d-chess/static/js/main.45d5bbf5.chunk.js.map",
+    "main.css": "/one-d-chess/static/css/main.bee9097d.chunk.css",
+    "main.js": "/one-d-chess/static/js/main.bccb32b4.chunk.js",
+    "main.js.map": "/one-d-chess/static/js/main.bccb32b4.chunk.js.map",
     "runtime-main.js": "/one-d-chess/static/js/runtime-main.14eafa35.js",
     "runtime-main.js.map": "/one-d-chess/static/js/runtime-main.14eafa35.js.map",
     "static/js/2.d5886377.chunk.js": "/one-d-chess/static/js/2.d5886377.chunk.js",
@@ -10,14 +10,14 @@
     "static/js/3.e726b0e4.chunk.js": "/one-d-chess/static/js/3.e726b0e4.chunk.js",
     "static/js/3.e726b0e4.chunk.js.map": "/one-d-chess/static/js/3.e726b0e4.chunk.js.map",
     "index.html": "/one-d-chess/index.html",
-    "static/css/main.910f1dd1.chunk.css.map": "/one-d-chess/static/css/main.910f1dd1.chunk.css.map",
+    "static/css/main.bee9097d.chunk.css.map": "/one-d-chess/static/css/main.bee9097d.chunk.css.map",
     "static/js/2.d5886377.chunk.js.LICENSE.txt": "/one-d-chess/static/js/2.d5886377.chunk.js.LICENSE.txt",
     "static/media/white-knight.e902bf46.png": "/one-d-chess/static/media/white-knight.e902bf46.png"
   },
   "entrypoints": [
     "static/js/runtime-main.14eafa35.js",
     "static/js/2.d5886377.chunk.js",
-    "static/css/main.910f1dd1.chunk.css",
-    "static/js/main.45d5bbf5.chunk.js"
+    "static/css/main.bee9097d.chunk.css",
+    "static/js/main.bccb32b4.chunk.js"
   ]
 }
