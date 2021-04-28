@@ -1,6 +1,7 @@
 body {
   background-color: #3D3C38;
   color: #BABAB8;
+  font-family: Helvetica;
 }
 
 .App {
@@ -59,17 +60,14 @@ img {
   width: 100%;
   height: 100%;
   overflow: auto;
-  background-color: rgb(0,0,0);
-  background-color: rgba(0,0,0,0.4);
 }
 
 #modal-content {
   background-color: #31312e;
   margin: 15% auto;
   padding: 5%;
-  border-radius: 10px;
-  /* border: 1px solid #888; */
   width: 80%;
+  animation: fade-in-drop-down 0.5s;
 }
 #play-again-btn {
   padding: 2%;
@@ -83,4 +81,15 @@ img {
 }
 #play-again-btn:focus {
   outline: 0;  
+}
+
+@keyframes fade-in-drop-down {
+  from {
+    opacity: 0;
+    margin-top:0;
+  }
+  to {
+    opacity: 1;
+    margin-top:15%;
+  }
 }

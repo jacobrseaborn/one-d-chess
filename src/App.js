@@ -112,11 +112,16 @@ class Game {
   isStalemate() {
     game.validMoves=[];
     window.dispatchEvent(new Event("getAllValidMoves"));
-    if (game.validMoves.length===0 && !game.isCheck(game.pieces, !game.turn)) {
-      return true;
+
+    if (game.validMoves.length===0 && !game.isCheck(game.pieces, !game.turn)) { return true; }
+    for (let i=0;i<this.pieces.length;i++) {
+      if (this.pieces[i]!=="") {
+        if (this.pieces[i].type==="rook") { return false; }
+      }
     }
+
     game.validMoves=[];
-    return false;
+    return true;
   }
   isCheckmate() {
     game.validMoves=[];
@@ -130,6 +135,12 @@ class Game {
 }
 
 var game = new Game();
+
+window.addEventListener("click", (e) => {
+  if (!e.target.className.includes("no-deselect")) {
+    window.dispatchEvent(new Event("deselectAll"));
+  }
+});
 
 class Square extends React.Component {
 
@@ -167,8 +178,8 @@ class Square extends React.Component {
 
   render() {
     return (
-      <button className="square" data-pos={this.props.pos} data-selected={this.state.selected} data-colour={this.state.colour} onClick={() => this.handleClick()}>
-        <img src={(this.state.img!==Dot)?this.state.contents.img:this.state.img} alt={this.state.contents.type} draggable="false"/>
+      <button className="square no-deselect" data-pos={this.props.pos} data-selected={this.state.selected} data-colour={this.state.colour} onClick={() => this.handleClick()}>
+        <img src={(this.state.img!==Dot)?this.state.contents.img:this.state.img} alt={this.state.contents.type} draggable="false" className="no-deselect"/>
       </button>
     );
   }
@@ -329,7 +340,6 @@ class Modal extends React.Component {
       } else {
         this.setState({modalMessage:"the game was a draw due to stalemate"});  
       }
-
       document.getElementById("modal").style.display="block";
     });
   }
